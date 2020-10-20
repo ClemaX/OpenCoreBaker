@@ -12,9 +12,9 @@ t_vitamin		**vitamins_load(plist_t vitamins_array)
 		plist_t				vitamin_entry;
 
 		plist_array_new_iter(vitamins_array, &iterator);
+		do
 		plist_array_next_item(vitamins_array, iterator, &vitamin_entry);
-		while ((*current++ = vitamin_load(vitamin_entry)))
-			plist_array_next_item(vitamins_array, iterator, &vitamin_entry);
+		while ((*current++ = vitamin_load(vitamin_entry)));
 		free(iterator);
 		if ((size_t)(current - vitamins) != vitamins_length + 1)
 		{
