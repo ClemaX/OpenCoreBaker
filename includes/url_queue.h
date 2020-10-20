@@ -7,6 +7,8 @@
 
 # include <stdlib.h>
 # include <stdio.h>
+# include <libgen.h>
+# include <ftw.h>
 
 # include <errno.h>
 # include <string.h>
@@ -33,6 +35,6 @@ t_url_queue		*url_queue_init(char *cache_dest, char **urls);
 void			url_queue_cleanup(t_url_queue **queue);
 
 int				url_queue_add(t_url_queue *handle, char *url);
-int				url_queue_fetch(t_url_queue *queue, char *url);
+int				url_queue_fetch(t_url_queue *queue);
 
 #endif

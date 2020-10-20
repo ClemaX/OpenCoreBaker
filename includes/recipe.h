@@ -15,7 +15,10 @@
 # include <vitamin.h>
 # include <config.h>
 
+# include <url_queue.h>
+
 # define DEST_MODE	(S_IRWXU | S_IRGRP | S_IROTH)
+# define CACHE_DIR	"/tmp"
 
 typedef struct	s_recipe {
 	char		*name;

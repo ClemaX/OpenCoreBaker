@@ -109,6 +109,9 @@ void			downloads_print(t_recipe *recipe)
 		printf("%s\n", *current);
 		current++;
 	}
+	t_url_queue	*queue = url_queue_init(CACHE_DIR, urls);
+	url_queue_fetch(queue);
+	url_queue_cleanup(&queue);
 	free(urls);
 }
 
