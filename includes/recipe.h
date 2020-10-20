@@ -17,8 +17,15 @@
 
 # include <url_queue.h>
 
-# define DEST_MODE	(S_IRWXU | S_IRGRP | S_IROTH)
-# define CACHE_DIR	"/tmp"
+# define OC_DIST				"RELEASE"
+# define OC_REPO				"https://github.com/acidanthera/OpenCorePkg"
+# define OC_URL_TEMPLATE		OC_REPO"/releases/download/%s/OpenCore-%s-"OC_DIST".zip"
+
+# define DEST_MODE				(S_IRWXU | S_IRGRP | S_IROTH)
+# define CACHE_DIR				"/tmp"
+
+# define RECIPE_GET(root, key)	plist_dict_get_item(root, key);
+
 
 typedef struct	s_recipe {
 	char		*name;

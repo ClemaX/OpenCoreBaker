@@ -53,12 +53,12 @@ t_recipe		*recipe_load(const char *filepath)
 	{
 		if ((recipe = malloc(sizeof(*recipe))))
 		{
-			plist_t name_node = plist_dict_get_item(recipe_root, "Name");
-			plist_t oc_version_node = plist_dict_get_item(recipe_root, "OCVersion");
-			plist_t	drivers_node = plist_dict_get_item(recipe_root, "Drivers");
-			plist_t	kexts_node = plist_dict_get_item(recipe_root, "Kexts");
-			plist_t	ssdts_node = plist_dict_get_item(recipe_root, "SSDT");
-			plist_t	config_node = plist_dict_get_item(recipe_root, "Config");
+			plist_t name_node = RECIPE_GET(recipe_root, "Name");
+			plist_t oc_version_node = RECIPE_GET(recipe_root, "OCVersion");
+			plist_t	drivers_node = RECIPE_GET(recipe_root, "Drivers");
+			plist_t	kexts_node = RECIPE_GET(recipe_root, "Kexts");
+			plist_t	ssdts_node = RECIPE_GET(recipe_root, "SSDT");
+			plist_t	config_node = RECIPE_GET(recipe_root, "Config");
 
 			plist_get_string_val(name_node, &recipe->name);
 			plist_get_string_val(oc_version_node, &recipe->oc_version);
@@ -73,16 +73,31 @@ t_recipe		*recipe_load(const char *filepath)
 	return (recipe);
 }
 
+size_t			recipe_size(t_recipe *recipe)
+{
+	return (
+		vitamins_size(recipe->drivers)
+		+ vitamins_size(recipe->kexts)
+		+ vitamins_size(recipe->ssdts)
+		+ 1
+	);
+}
+
 char			**recipe_urls(t_recipe *recipe)
 {
-	size_t	size = vitamins_size(recipe->drivers)
-		+ vitamins_size(recipe->kexts)
-		+ vitamins_size(recipe->ssdts);
-	char	**urls = calloc(size + 1, sizeof(*urls));
+	char	**urls = calloc(recipe_size(recipe) + 1, sizeof(*urls));
+	char	*oc_release_url = NULL;
 
-	vitamins_urls(recipe->drivers, urls);
-	vitamins_urls(recipe->kexts, urls);
-	vitamins_urls(recipe->ssdts, urls);
+	if (urls && asprintf(&oc_release_url, OC_URL_TEMPLATE,
+		recipe->oc_version, recipe->oc_version) != -1)
+	{
+		vitamins_urls(recipe->drivers, urls);
+		vitamins_urls(recipe->kexts, urls);
+		vitamins_urls(recipe->ssdts, urls);
+		urls_append(urls, oc_release_url);
+	}
+	else
+		perror("Error");
 	return (urls);
 }
 
