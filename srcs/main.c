@@ -4,15 +4,20 @@ int main(int ac, char **av)
 {
 	if (ac == 3)
 	{
-		t_recipe	*recipe = recipe_load(av[1]);
-		int			ret = 1;
-
-		if (recipe)
+		if (curl_global_init(CURL_GLOBAL_ALL) == CURLE_OK)
 		{
-			ret = recipe_bake(recipe, av[2]);
-			recipe_free(&recipe);
+			t_recipe	*recipe = recipe_load(av[1]);
+			int			ret = 1;
+
+			if (recipe)
+			{
+				ret = recipe_bake(recipe, av[2]);
+				recipe_free(&recipe);
+			}
+			curl_global_cleanup();
+			return (ret);
 		}
-		return (ret);
+		perror("Error while initializing curl");
 	}
 	printf("Usage:	%s <recipe-plist> <destination-dir>\n", av[0]);
     return (1);

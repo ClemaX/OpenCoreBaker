@@ -67,7 +67,20 @@ t_recipe		*recipe_load(const char *filepath)
 	return (recipe);
 }
 
-int				recipe_bake(t_recipe *recipe, t_url destination)
+char			**recipe_urls(t_recipe *recipe)
+{
+	size_t	size = vitamins_size(recipe->drivers)
+		+ vitamins_size(recipe->kexts)
+		+ vitamins_size(recipe->ssdts);
+	char	**urls = calloc(size + 1, sizeof(*urls));
+
+	vitamins_urls(recipe->drivers, urls);
+	vitamins_urls(recipe->kexts, urls);
+	vitamins_urls(recipe->ssdts, urls);
+	return (urls);
+}
+
+int				recipe_bake(t_recipe *recipe, char *destination)
 {
 	struct stat	st;
 	char		*enclosing_dir = dirname(destination);
@@ -87,6 +100,18 @@ int				recipe_bake(t_recipe *recipe, t_url destination)
 	return (1);
 }
 
+void			downloads_print(t_recipe *recipe)
+{
+	char	**urls = recipe_urls(recipe);
+	char	**current = urls;
+	while (*current)
+	{
+		printf("%s\n", *current);
+		current++;
+	}
+	free(urls);
+}
+
 int				recipe_print(t_recipe *recipe)
 {
 	if (recipe)
@@ -101,6 +126,8 @@ int				recipe_print(t_recipe *recipe)
 		vitamins_print(recipe->ssdts);
 		printf("\nConfig:\n");
 		config_print(recipe->config);
+		printf("\nDownloads:\n");
+		downloads_print(recipe);
 		return (1);
 	}
 	return (0);

@@ -1,4 +1,8 @@
 {
     "editor.detectIndentation": false,
-    "editor.insertSpaces": false
+	"editor.insertSpaces": false,
+	"files.associations": {
+		"__config": "cpp",
+		"type_traits": "cpp"
+	}
 }

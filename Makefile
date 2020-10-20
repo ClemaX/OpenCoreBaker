@@ -15,11 +15,11 @@ OBJDIR = objs
 BINDIR = bin
 DEPDIR = .deps
 
-CFLAGS = -Wall -Wextra -DOCB_DIST=$(DIST) -I$(INCDIR)
+CFLAGS = -Wall -Wextra -g3 -DOCB_DIST=$(DIST) -I$(INCDIR)
 DFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
-LFLAGS = -arch $(ARCH) -macosx_version_min 10.13 -lSystem -lplist-2.0.3
+LFLAGS = -arch $(ARCH) -macosx_version_min 10.13 -lSystem -lplist-2.0.3 -lcurl
 
-SRCS = $(addprefix srcs/, main.c recipe.c vitamin.c config.c)
+SRCS = $(addprefix srcs/, main.c recipe.c vitamin.c url.c config.c)
 
 DEPS = $(SRCS:$(SRCDIR)/%.c=$(DEPDIR)/%.d)
 OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)

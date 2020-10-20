@@ -15,8 +15,6 @@
 # include <vitamin.h>
 # include <config.h>
 
-# include <url.h>
-
 # define DEST_MODE	(S_IRWXU | S_IRGRP | S_IROTH)
 
 typedef struct	s_recipe {
@@ -31,7 +29,9 @@ typedef struct	s_recipe {
 t_recipe	*recipe_load(const char *filepath);
 void		recipe_free(t_recipe **recipe);
 
+char		**recipe_urls(t_recipe *recipe);
+
 int			recipe_print(t_recipe *recipe);
-int			recipe_bake(t_recipe *recipe, t_url destination);
+int			recipe_bake(t_recipe *recipe, char *destination);
 
 #endif

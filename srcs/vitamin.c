@@ -13,7 +13,7 @@ t_vitamin		**vitamins_load(plist_t vitamins_array)
 
 		plist_array_new_iter(vitamins_array, &iterator);
 		do
-		plist_array_next_item(vitamins_array, iterator, &vitamin_entry);
+			plist_array_next_item(vitamins_array, iterator, &vitamin_entry);
 		while ((*current++ = vitamin_load(vitamin_entry)));
 		free(iterator);
 		if ((size_t)(current - vitamins) != vitamins_length + 1)
@@ -44,6 +44,30 @@ t_vitamin		*vitamin_load(plist_t vitamin_dict)
 		plist_get_string_val(release_url_node, &vitamin->release_url);
 	}
 	return (vitamin);
+}
+
+size_t		vitamins_size(t_vitamin **vitamins)
+{
+	size_t	size = 0;
+
+	while (*vitamins)
+	{
+		if (url_is_http((*vitamins)->release_url))
+			size++;
+		vitamins++;
+	}
+	return (size);
+}
+
+char		**vitamins_urls(t_vitamin **vitamins, char **urls)
+{
+	while (*vitamins)
+	{
+		if (url_is_http((*vitamins)->release_url))
+			urls_append(urls, (*vitamins)->release_url);
+		vitamins++;
+	}
+	return (urls);
 }
 
 void		vitamin_free(t_vitamin **vitamin)
