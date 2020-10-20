@@ -31,11 +31,15 @@ void			recipe_free(t_recipe **recipe)
 {
 	if (recipe && *recipe)
 	{
-		free((*recipe)->name);
-		free((*recipe)->oc_version);
-		vitamins_free(&(*recipe)->drivers);
-		vitamins_free(&(*recipe)->kexts);
-		vitamins_free(&(*recipe)->ssdts);
+		t_recipe	*content = *recipe;
+
+		free(content->name);
+		free(content->oc_version);
+		vitamins_free(&content->drivers);
+		vitamins_free(&content->kexts);
+		vitamins_free(&content->ssdts);
+		urls_free(&content->urls);
+		plist_free(content->config);
 		*recipe = NULL;
 	}
 }
@@ -54,13 +58,15 @@ t_recipe		*recipe_load(const char *filepath)
 			plist_t	drivers_node = plist_dict_get_item(recipe_root, "Drivers");
 			plist_t	kexts_node = plist_dict_get_item(recipe_root, "Kexts");
 			plist_t	ssdts_node = plist_dict_get_item(recipe_root, "SSDT");
+			plist_t	config_node = plist_dict_get_item(recipe_root, "Config");
 
 			plist_get_string_val(name_node, &recipe->name);
 			plist_get_string_val(oc_version_node, &recipe->oc_version);
 			recipe->drivers = vitamins_load(drivers_node);
 			recipe->kexts = vitamins_load(kexts_node);
 			recipe->ssdts = vitamins_load(ssdts_node);
-			recipe->config = plist_dict_get_item(recipe_root, "Config");
+			recipe->config = plist_copy(config_node);
+			recipe->urls = recipe_urls(recipe);
 		}
 		plist_free(recipe_root);
 	}
@@ -100,21 +106,6 @@ int				recipe_bake(t_recipe *recipe, char *destination)
 	return (1);
 }
 
-void			downloads_print(t_recipe *recipe)
-{
-	char	**urls = recipe_urls(recipe);
-	char	**current = urls;
-	while (*current)
-	{
-		printf("%s\n", *current);
-		current++;
-	}
-	t_url_queue	*queue = url_queue_init(CACHE_DIR, urls);
-	url_queue_fetch(queue);
-	url_queue_cleanup(&queue);
-	free(urls);
-}
-
 int				recipe_print(t_recipe *recipe)
 {
 	if (recipe)
@@ -130,7 +121,7 @@ int				recipe_print(t_recipe *recipe)
 		printf("\nConfig:\n");
 		config_print(recipe->config);
 		printf("\nDownloads:\n");
-		downloads_print(recipe);
+		urls_print(recipe->urls);
 		return (1);
 	}
 	return (0);

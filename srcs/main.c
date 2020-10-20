@@ -17,7 +17,7 @@ int main(int ac, char **av)
 			curl_global_cleanup();
 			return (ret);
 		}
-		perror("Error while initializing curl");
+		perror("Error during curl init");
 	}
 	printf("Usage:	%s <recipe-plist> <destination-dir>\n", av[0]);
     return (1);
