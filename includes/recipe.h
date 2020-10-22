@@ -17,6 +17,10 @@
 
 # include <url_queue.h>
 
+# define VIT_KEXT				VIT_DIRECTORY
+# define VIT_DRIVER				VIT_REGULAR
+# define VIT_SSDT			VIT_REGULAR
+
 # define OC_DIST				"RELEASE"
 # define OC_REPO				"https://github.com/acidanthera/OpenCorePkg"
 # define OC_URL_TEMPLATE		OC_REPO"/releases/download/%s/OpenCore-%s-"OC_DIST".zip"
@@ -43,6 +47,6 @@ void		recipe_free(t_recipe **recipe);
 char		**recipe_urls(t_recipe *recipe);
 
 int			recipe_print(t_recipe *recipe);
-int			recipe_bake(t_recipe *recipe, char *destination);
+int			recipe_bake(t_recipe *recipe, const char *destination);
 
 #endif

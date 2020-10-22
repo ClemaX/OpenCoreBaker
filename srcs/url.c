@@ -11,7 +11,6 @@ int			url_is_http(char *url)
 	return (!strncmp(url, "http://", 7) || !strncmp(url, "https://", 8));
 }
 
-
 // TODO: Quick Sort, Remove Dupplicates and Swap to the Left
 void		urls_append(char **urls, char *url)
 {

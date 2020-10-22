@@ -25,7 +25,7 @@
 			<key>ReleaseUrl</key>
 			<string>https://github.com/acidanthera/Lilu/releases/download/1.4.8/Lilu-1.4.8-RELEASE.zip</string>
 			<key>Path</key>
-			<string>Lilu.kext</string>
+			<string>Lilu.kext/</string>
 		</dict>
 		<dict>
 			<key>Name</key>
@@ -33,7 +33,7 @@
 			<key>ReleaseUrl</key>
 			<string>https://github.com/acidanthera/VirtualSMC/releases/download/1.1.7/VirtualSMC-1.1.7-RELEASE.zip</string>
 			<key>Path</key>
-			<string>Kexts/VirtualSMC.kext</string>
+			<string>Kexts/VirtualSMC.kext/</string>
 		</dict>
 		<dict>
 			<key>Name</key>
@@ -41,7 +41,7 @@
 			<key>ReleaseUrl</key>
 			<string>https://github.com/acidanthera/AppleALC/releases/download/1.5.3/AppleALC-1.5.3-RELEASE.zip</string>
 			<key>Path</key>
-			<string>AppleALC.kext</string>
+			<string>AppleALC.kext/</string>
 		</dict>
 		<dict>
 			<key>Name</key>
@@ -49,7 +49,7 @@
 			<key>ReleaseUrl</key>
 			<string>https://github.com/acidanthera/IntelMausi/releases/download/1.0.4/IntelMausi-1.0.4-RELEASE.zip</string>
 			<key>Path</key>
-			<string>IntelMausi.kext</string>
+			<string>IntelMausi.kext/</string>
 		</dict>
 		<dict>
 			<key>Name</key>
@@ -57,7 +57,7 @@
 			<key>ReleaseUrl</key>
 			<string>https://github.com/acidanthera/VirtualSMC/releases/download/1.1.7/VirtualSMC-1.1.7-RELEASE.zip</string>
 			<key>Path</key>
-			<string>Kexts/SMCProcessor.kext</string>
+			<string>Kexts/SMCProcessor.kext/</string>
 		</dict>
 		<dict>
 			<key>Name</key>
@@ -65,7 +65,7 @@
 			<key>ReleaseUrl</key>
 			<string>https://github.com/acidanthera/VirtualSMC/releases/download/1.1.7/VirtualSMC-1.1.7-RELEASE.zip</string>
 			<key>Path</key>
-			<string>Kexts/SMCSuperIO.kext</string>
+			<string>Kexts/SMCSuperIO.kext/</string>
 		</dict>
 		<dict>
 			<key>Name</key>
@@ -73,7 +73,7 @@
 			<key>ReleaseUrl</key>
 			<string>Kexts/</string>
 			<key>Path</key>
-			<string>USBPorts.kext</string>
+			<string>USBPorts.kext/</string>
 		</dict>
 		<dict>
 			<key>Name</key>
@@ -81,7 +81,7 @@
 			<key>ReleaseUrl</key>
 			<string>https://github.com/acidanthera/WhateverGreen/releases/download/1.4.3/WhateverGreen-1.4.3-RELEASE.zip</string>
 			<key>Path</key>
-			<string>WhateverGreen.kext</string>
+			<string>WhateverGreen.kext/</string>
 		</dict>
 	</array>
 	<key>SSDT</key>

@@ -27,23 +27,6 @@ static plist_t	plist_load(const char *filepath)
 	return (NULL);
 }
 
-void			recipe_free(t_recipe **recipe)
-{
-	if (recipe && *recipe)
-	{
-		t_recipe	*content = *recipe;
-
-		free(content->name);
-		free(content->oc_version);
-		vitamins_free(&content->drivers);
-		vitamins_free(&content->kexts);
-		vitamins_free(&content->ssdts);
-		urls_free(&content->urls);
-		plist_free(content->config);
-		*recipe = NULL;
-	}
-}
-
 t_recipe		*recipe_load(const char *filepath)
 {
 	plist_t		recipe_root;
@@ -62,15 +45,32 @@ t_recipe		*recipe_load(const char *filepath)
 
 			plist_get_string_val(name_node, &recipe->name);
 			plist_get_string_val(oc_version_node, &recipe->oc_version);
-			recipe->drivers = vitamins_load(drivers_node);
-			recipe->kexts = vitamins_load(kexts_node);
-			recipe->ssdts = vitamins_load(ssdts_node);
+			recipe->drivers = vitamins_load(drivers_node, VIT_DRIVER);
+			recipe->kexts = vitamins_load(kexts_node, VIT_KEXT);
+			recipe->ssdts = vitamins_load(ssdts_node, VIT_SSDT);
 			recipe->config = plist_copy(config_node);
 			recipe->urls = recipe_urls(recipe);
 		}
 		plist_free(recipe_root);
 	}
 	return (recipe);
+}
+
+void			recipe_free(t_recipe **recipe)
+{
+	if (recipe && *recipe)
+	{
+		t_recipe	*content = *recipe;
+
+		free(content->name);
+		free(content->oc_version);
+		vitamins_free(&content->drivers);
+		vitamins_free(&content->kexts);
+		vitamins_free(&content->ssdts);
+		urls_free(&content->urls);
+		plist_free(content->config);
+		*recipe = NULL;
+	}
 }
 
 size_t			recipe_size(t_recipe *recipe)
@@ -101,24 +101,65 @@ char			**recipe_urls(t_recipe *recipe)
 	return (urls);
 }
 
-int				recipe_bake(t_recipe *recipe, char *destination)
+int				recipe_bake(t_recipe *recipe, const char *destination)
 {
+	int			status = 0;
 	struct stat	st;
-	char		*enclosing_dir = dirname(destination);
+	char		*enclosing_dir = adirname(destination);
+	char		**urls = NULL;
+	t_url_queue	*queue = NULL;
 
-	if (stat(enclosing_dir, &st) == 0 && S_ISDIR(st.st_mode))
+	if (!enclosing_dir)
 	{
-		if (!mkdir(destination, DEST_MODE) || errno == EEXIST)
-		{
-			printf("Baking '%s' to '%s'...\n", recipe->name, destination);
-			recipe_print(recipe);
-			return (0);
-		}
-		printf("Error: %s: %s\n", destination, strerror(errno));
-		return (1);
+		perror("Error");
+		status = 1;
+		goto failure_malloc_dirname;
 	}
-	printf("'%s' is not a valid directory!\n", enclosing_dir);
-	return (1);
+	if (stat(enclosing_dir, &st) || !S_ISDIR(st.st_mode))
+	{
+		status = 1;
+		goto failure_mkdir;
+	}
+	if (mkdir(destination, DEST_MODE) && errno != EEXIST)
+	{
+		perror(destination);
+		status = 1;
+		goto failure_mkdir;
+	}
+	if (!(urls = recipe_urls(recipe)))
+	{
+		status = 1;
+		goto failure_malloc_urls;
+	}
+	if (!(queue = url_queue_init(CACHE_DIR, urls)))
+	{
+		status = 1;
+		goto failure_init_queue;
+	}
+
+	printf("Baking '%s' to '%s'...\n", recipe->name, destination);
+	if ((status = url_queue_fetch(queue)))
+		goto failure_fetch_queue;
+
+	printf("\nInstall: \n");
+	vitamins_install(recipe->kexts, queue->cache, destination);
+	
+	failure_fetch_queue:
+	url_queue_cleanup(queue);
+
+	url_queue_free(&queue, 1);
+
+	failure_init_queue:
+	free(urls);
+
+	failure_malloc_urls:
+
+	failure_mkdir:
+	free(enclosing_dir);
+
+	failure_malloc_dirname:
+
+	return (status);
 }
 
 int				recipe_print(t_recipe *recipe)

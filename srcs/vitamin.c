@@ -1,6 +1,6 @@
 #include <vitamin.h>
 
-t_vitamin		**vitamins_load(plist_t vitamins_array)
+t_vitamin		**vitamins_load(plist_t vitamins_array, t_vitamin_t type)
 {
 	const size_t	vitamins_length = plist_array_get_size(vitamins_array);
 	t_vitamin		**vitamins = malloc(sizeof(*vitamins) * (vitamins_length + 1));
@@ -14,7 +14,7 @@ t_vitamin		**vitamins_load(plist_t vitamins_array)
 		plist_array_new_iter(vitamins_array, &iterator);
 		do
 			plist_array_next_item(vitamins_array, iterator, &vitamin_entry);
-		while ((*current++ = vitamin_load(vitamin_entry)));
+		while ((*current++ = vitamin_load(vitamin_entry, type)));
 		free(iterator);
 		if ((size_t)(current - vitamins) != vitamins_length + 1)
 		{
@@ -29,7 +29,7 @@ t_vitamin		**vitamins_load(plist_t vitamins_array)
 	return (vitamins);
 }
 
-t_vitamin		*vitamin_load(plist_t vitamin_dict)
+t_vitamin		*vitamin_load(plist_t vitamin_dict, t_vitamin_t type)
 {
 	t_vitamin	*vitamin = NULL;
 
@@ -39,6 +39,7 @@ t_vitamin		*vitamin_load(plist_t vitamin_dict)
 		plist_t	path_node = plist_dict_get_item(vitamin_dict, "Path");
 		plist_t	release_url_node = plist_dict_get_item(vitamin_dict, "ReleaseUrl");
 
+		vitamin->type = type;
 		plist_get_string_val(name_node, &vitamin->name);
 		plist_get_string_val(path_node, &vitamin->path);
 		plist_get_string_val(release_url_node, &vitamin->release_url);
@@ -90,6 +91,62 @@ void		vitamins_free(t_vitamin ***vitamins)
 		free(*vitamins);
 		*vitamins = NULL;
 	}
+}
+
+int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
+{
+	t_ar_status status = AR_SUCCESS;
+
+	if (cache)
+	{
+		char	*file_name = basename(vitamin->release_url);
+
+		if (is_archive(file_name))
+		{
+			t_ar_opt	options =
+				(vitamin->type & VIT_DIRECTORY) ? AR_RECURSIVE : 0;
+			char		*file_location = NULL;
+
+			asprintf(&file_location, "%s/%s", cache, file_name);
+
+			if (!file_location)
+			{
+				perror("Error");
+				goto failure_malloc_file_location;
+			}
+			if ((status = archive_extract(file_location, vitamin->path, dest,
+				options)))
+			{
+				printf("%s: %s!\n", file_location, archive_strerror(status));
+				goto failure_extract_archive;
+			}
+
+			failure_extract_archive:
+			free(file_location);
+
+			failure_malloc_file_location:
+			;
+		}
+		else
+		{
+			
+		}
+		return (status);
+	}
+	printf("Invalid cache: '%s'!\n", cache);
+	return (0);
+}
+
+int	vitamins_install(t_vitamin **vitamins, const char *cache, const char *dest)
+{
+	if (vitamins)
+	{
+		while (*vitamins)
+		{
+			vitamin_install(*vitamins++, cache, dest);
+		}
+	}
+	return (1);
 }
 
 int	vitamin_print(t_vitamin *vitamin)

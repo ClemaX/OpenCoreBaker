@@ -16,9 +16,9 @@ OBJDIR = objs/$(DIST)
 BINDIR = bin/$(DIST)
 DEPDIR = .deps/$(DIST)
 
-CFLAGS = -Wall -Wextra -DOCB_DIST=$(DIST) -I$(INCDIR)
+CFLAGS = -Wall -Wextra -Werror -DOCB_DIST=$(DIST) -I$(INCDIR)
 DFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
-LFLAGS = -lplist-2.0.3 -lcurl
+LFLAGS = -lplist-2.0.3 -lcurl -lzip
 
 #ifeq ($(OS), Darwin)
 #	LFLAGS += -lSystem -macosx_version_min 10.13
@@ -29,7 +29,17 @@ ifeq ($(DIST), debug)
 	LFLAGS += -g3 -fsanitize=address -fsanitize=undefined# -fsanitize=leak
 endif
 
-SRCS = $(addprefix srcs/, main.c recipe.c vitamin.c url.c url_queue.c config.c)
+SRCS = $(addprefix srcs/,\
+	main.c\
+	recipe.c\
+	vitamin.c\
+	url.c\
+	url_queue.c\
+	url_dl.c\
+	archive.c\
+	file_utils.c\
+	config.c\
+)
 
 DEPS = $(SRCS:$(SRCDIR)/%.c=$(DEPDIR)/%.d)
 OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
