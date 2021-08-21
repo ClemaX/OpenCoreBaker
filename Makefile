@@ -9,7 +9,7 @@ ARCH = x86_64
 CC = clang
 LD = clang
 
-SRCDIR = srcs
+SRCDIR = src
 INCDIR = include
 
 OBJDIR = objs/$(DIST)
@@ -29,7 +29,7 @@ ifeq ($(DIST), debug)
 	LFLAGS += -g3 -fsanitize=address -fsanitize=undefined# -fsanitize=leak
 endif
 
-SRCS = $(addprefix srcs/,\
+SRCS = $(addprefix $(SRCDIR)/,\
 	main.c\
 	recipe.c\
 	vitamin.c\
