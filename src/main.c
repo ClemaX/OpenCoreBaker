@@ -13,6 +13,7 @@ int main(int ac, char **av)
 
 			if (recipe)
 			{
+				//ret = recipe_print(recipe);
 				ret = recipe_bake(recipe, av[2]);
 				recipe_free(&recipe);
 			}

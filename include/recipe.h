@@ -2,16 +2,13 @@
 
 #include <sys/stat.h>
 
+#include <oc.h>
 #include <vitamin.h>
 #include <config.h>
 
 #define VIT_KEXT	VIT_DIRECTORY
 #define VIT_DRIVER	VIT_REGULAR
 #define VIT_SSDT	VIT_REGULAR
-
-#define OC_DIST				"RELEASE"
-#define OC_REPO				"https://github.com/acidanthera/OpenCorePkg"
-#define OC_URL_TEMPLATE		OC_REPO"/releases/download/%s/OpenCore-%s-"OC_DIST".zip"
 
 #define DEST_MODE				(S_IRWXU | S_IRGRP | S_IROTH)
 #define CACHE_DIR				"/tmp"
@@ -21,7 +18,7 @@
 
 typedef struct	s_recipe {
 	char		*name;
-	char		*oc_version;
+	t_oc		oc;
 	t_vitamin	**drivers;
 	t_vitamin	**kexts;
 	t_vitamin	**ssdts;

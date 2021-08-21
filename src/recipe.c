@@ -44,14 +44,14 @@ t_recipe		*recipe_load(const char *filepath)
 		if ((recipe = malloc(sizeof(*recipe))))
 		{
 			plist_t name_node = RECIPE_GET(recipe_root, "Name");
-			plist_t oc_version_node = RECIPE_GET(recipe_root, "OCVersion");
+			plist_t oc_node = RECIPE_GET(recipe_root, "OpenCore");
 			plist_t	drivers_node = RECIPE_GET(recipe_root, "Drivers");
 			plist_t	kexts_node = RECIPE_GET(recipe_root, "Kexts");
 			plist_t	ssdts_node = RECIPE_GET(recipe_root, "SSDT");
 			plist_t	config_node = RECIPE_GET(recipe_root, "Config");
 
 			plist_get_string_val(name_node, &recipe->name);
-			plist_get_string_val(oc_version_node, &recipe->oc_version);
+			oc_load(&recipe->oc, oc_node);
 			recipe->drivers = vitamins_load(drivers_node, VIT_DRIVER);
 			recipe->kexts = vitamins_load(kexts_node, VIT_KEXT);
 			recipe->ssdts = vitamins_load(ssdts_node, VIT_SSDT);
@@ -69,14 +69,15 @@ void			recipe_free(t_recipe **recipe)
 	{
 		t_recipe	*content = *recipe;
 
+		*recipe = NULL;
+
 		free(content->name);
-		free(content->oc_version);
+		oc_free(&content->oc);
 		vitamins_free(&content->drivers);
 		vitamins_free(&content->kexts);
 		vitamins_free(&content->ssdts);
 		urls_free(&content->urls);
 		plist_free(content->config);
-		*recipe = NULL;
 	}
 }
 
@@ -95,8 +96,7 @@ char			**recipe_urls(t_recipe *recipe)
 	char	**urls = calloc(recipe_size(recipe) + 1, sizeof(*urls));
 	char	*oc_release_url = NULL;
 
-	if (urls && asprintf(&oc_release_url, OC_URL_TEMPLATE,
-		recipe->oc_version, recipe->oc_version) != -1)
+	if (urls && oc_url(&oc_release_url, recipe->oc.version, recipe->oc.distribution) != -1)
 	{
 		vitamins_urls(recipe->drivers, urls);
 		vitamins_urls(recipe->kexts, urls);
@@ -104,7 +104,11 @@ char			**recipe_urls(t_recipe *recipe)
 		urls_append(urls, oc_release_url);
 	}
 	else
-		perror("Error");
+	{
+		free(urls);
+		urls = NULL;
+		perror("malloc");
+	}
 	return (urls);
 }
 
@@ -149,8 +153,9 @@ int				recipe_bake(t_recipe *recipe, const char *destination)
 		goto failure_fetch_queue;
 
 	debug("\nInstall: \n");
-	vitamins_install(recipe->kexts, queue->cache, destination, "Kexts");
-	vitamins_install(recipe->drivers, queue->cache, destination, "Drivers");
+	oc_install(&recipe->oc, queue->cache, destination);
+	vitamins_install(recipe->kexts, queue->cache, destination, OC_KEXTS_PATH);
+	vitamins_install(recipe->drivers, queue->cache, destination, OC_DRIVERS_PATH);
 
 	failure_fetch_queue:
 	url_queue_cleanup(queue);
@@ -175,7 +180,7 @@ int				recipe_print(t_recipe *recipe)
 	if (recipe)
 	{
 		printf("\nName:		'%s'\n", recipe->name);
-		printf("OCVersion:	'%s'\n", recipe->oc_version);
+		oc_print(&recipe->oc);
 		printf("\nDrivers:\n");
 		vitamins_print(recipe->drivers);
 		printf("\nKexts:\n");
@@ -186,7 +191,7 @@ int				recipe_print(t_recipe *recipe)
 		config_print(recipe->config);
 		printf("\nDownloads:\n");
 		urls_print(recipe->urls);
-		return (1);
+		return (0);
 	}
-	return (0);
+	return (1);
 }

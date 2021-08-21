@@ -4,8 +4,15 @@
 <dict>
 	<key>Name</key>
 	<string>DeskMini 310 - Intel i3 8100</string>
-	<key>OCVersion</key>
-	<string>0.6.2</string>
+	<key>OpenCore</key>
+	<dict>
+		<key>Version</key>
+		<string>0.6.2</string>
+		<key>Distribution</key>
+		<string>RELEASE</string>
+		<key>Architecture</key>
+		<string>X64</string>
+	</dict>
 	<key>Drivers</key>
 	<array>
 		<dict>

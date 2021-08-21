@@ -10,7 +10,7 @@
 #include <url.h>
 #include <archive.h>
 
-#define VIT_REGULAR	1
+#define VIT_REGULAR		1
 #define VIT_DIRECTORY	2
 
 typedef char	t_vitamin_t;

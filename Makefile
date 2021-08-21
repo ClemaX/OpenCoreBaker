@@ -32,6 +32,7 @@ endif
 SRCS = $(addprefix $(SRCDIR)/,\
 	main.c\
 	recipe.c\
+	oc.c\
 	vitamin.c\
 	url.c\
 	url_queue.c\
