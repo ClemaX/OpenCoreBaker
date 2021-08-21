@@ -1,3 +1,7 @@
+#include <string.h>
+#include <errno.h>
+#include <ftw.h>
+
 #include <file_utils.h>
 
 static char	buffer[FILE_BUFFER_SIZE];
@@ -74,4 +78,38 @@ int			unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct F
 int			rmrf(char *path)
 {
 	return (nftw(path, unlink_cb, 64, FTW_DEPTH | FTW_PHYS));
+}
+
+int			mkdir_p(const char *path, mode_t mode)
+{
+	char			buff[PATH_MAX];
+	const size_t	len = strlen(path);
+	char			*end;
+
+	if (len == 0)
+		return 0;
+
+	if (len > sizeof(buff) - 1)
+		return -1;
+
+	strcpy(buff, path);
+/*
+	if (buff[len - 1] == '/')
+		buff[len - 1] = '\0'; */
+
+	for (end = buff + 1; *end; end++)
+	{
+		if (*end == '/')
+		{
+			*end = '\0';
+			if (mkdir(buff, mode) && errno != EEXIST)
+				return -1;
+			*end = '/';
+		}
+	}
+
+	if (mkdir(buff, mode) && errno != EEXIST)
+		return -1;
+
+	return 0;
 }

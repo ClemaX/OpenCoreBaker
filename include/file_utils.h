@@ -1,8 +1,18 @@
 #pragma once
 
+#ifdef __linux__
+# include <linux/limits.h>
+#else
+# include <limits.h>
+# ifdef WIN32
+#  define mkdir(path) _mkdir(path)
+# else
+#  include <unistd.h>
+# endif
+#endif
+
+#include <sys/stat.h>
 #include <stdio.h>
-#include <string.h>
-#include <ftw.h>
 
 #include <zip.h>
 
@@ -17,3 +27,5 @@ char	*abasename(const char *str);
 char	*adirname(const char *str);
 
 int		rmrf(char *path);
+int		mkdir_p(const char *path, mode_t mode);
+
