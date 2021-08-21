@@ -134,6 +134,9 @@ int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
 
 			if (asprintf(&dest_path, "%s/%s", dest, file_name) != -1)
 			{
+				if (mkdir_p(dest, AR_DEST_MODE))
+					status = AR_FAIL_OPEN_DEST;
+				else
 				status = copy(file_location, dest_path);
 				free(dest_path);
 			}
