@@ -4,7 +4,8 @@
 
 int		is_folder(const char *url)
 {
-	return (strrchr(url, '/')[1] == '\0');
+	const char *slash = strrchr(url, '/');
+	return ((url[0] == '.' && url[1] == '\0') || (slash && (slash[1] == '\0' || (slash[1] == '.' && slash[2] == '\0'))));
 }
 
 int		is_zip(const char *extension)
@@ -24,19 +25,12 @@ int		copy_cb(zip_file_t *file, zip_stat_t *sb, const char *relative_path, const 
 	t_ar_status	status = AR_SUCCESS;
 	char		*dest_path = NULL;
 	char		*dest_dir = NULL;
-	char		*basename = NULL;
 	FILE		*dest_file = NULL;
 
 	if (is_folder(sb->name))
 		goto done;
 
-	if (!(basename = abasename(sb->name)))
-	{
-		status = AR_FAIL_ALLOC;
-		goto failure_malloc_basename;
-	}
-
-	if (asprintf(&dest_path, "%s/%s/%s", (const char *)cb_data, relative_path, basename) == -1)
+	if (asprintf(&dest_path, "%s/%s", (const char *)cb_data, relative_path) == -1)
 	{
 		status = AR_FAIL_ALLOC;
 		perror("asprintf");
@@ -50,7 +44,6 @@ int		copy_cb(zip_file_t *file, zip_stat_t *sb, const char *relative_path, const 
 		goto failure_malloc_dest_dir;
 	}
 
-	debug("Creating directory at '%s'...\n", dest_dir);
 	if (mkdir_p(dest_dir, AR_DEST_MODE))
 	{
 		status = AR_FAIL_OPEN_DEST;
@@ -65,7 +58,7 @@ int		copy_cb(zip_file_t *file, zip_stat_t *sb, const char *relative_path, const 
 		goto failure_open_dest;
 	}
 
-	debug("Copying '%s' to '%s'...\n", relative_path, dest_dir);
+	debug("Copying '%s' to '%s'...\n", sb->name, dest_path);
 	if (!zcopy(file, dest_file))
 	{
 		perror(dest_path);
@@ -81,9 +74,6 @@ int		copy_cb(zip_file_t *file, zip_stat_t *sb, const char *relative_path, const 
 	free(dest_path);
 
 	failure_malloc_dest_path:
-	free(basename);
-
-	failure_malloc_basename:
 	done:
 	return (status);
 }
@@ -108,8 +98,9 @@ int		zip_ftw(zip_t *archive, const char *prefix, zip_ftw_cb cb, const void *cb_d
 			status = AR_FAIL_LOCATE;
 			goto done;
 		}
-		if (!prefix || !strncmp(prefix, sb.name, prefix_length))
+		if (!strncmp(prefix, sb.name, prefix_length))
 		{
+			debug("Matched %s!\n", prefix);
 			if (!(file = zip_fopen_index(archive, i, ZIP_FL_MODE)))
 			{
 				error("%s: %s!\n", prefix, zip_strerror(archive));
@@ -120,14 +111,17 @@ int		zip_ftw(zip_t *archive, const char *prefix, zip_ftw_cb cb, const void *cb_d
 			if (!(dirname = adirname(prefix)))
 			{
 				status = AR_FAIL_ALLOC;
-				goto done;
+				goto failure_malloc_dirname;
 			}
+
 			dirname_length = strlen(dirname);
 			if (dirname_length == 1 && *dirname == '.')
 				dirname_length = 0;
 
-			if ((status = cb(file, &sb, sb.name + dirname_length, cb_data)))
-				goto done;
+			free(dirname);
+			status = cb(file, &sb, sb.name + dirname_length, cb_data);
+
+			failure_malloc_dirname:
 			zip_fclose(file);
 		}
 	}

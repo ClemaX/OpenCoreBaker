@@ -109,9 +109,7 @@ int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
 				(vitamin->type & VIT_DIRECTORY) ? AR_RECURSIVE : 0;
 			char		*file_location = NULL;
 
-			asprintf(&file_location, "%s/%s", cache, file_name);
-
-			if (!file_location)
+			if (asprintf(&file_location, "%s/%s", cache, file_name) == -1)
 			{
 				perror("Error");
 				goto failure_malloc_file_location;
