@@ -1,19 +1,10 @@
 #pragma once
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <libgen.h>
-
-#include <errno.h>
-#include <string.h>
-
 #include <curl/curl.h>
-
-#include <file_utils.h>
 
 #define CACHE_TEMPLATE	"OpenCoreBaker.XXXXXX"
 
-#define MAXCONNECTS	10L
+#define MAXCONNECTS		10L
 #define MAXREDIRS		50L
 #define USERAGENT		"OpenCoreBaker/1.0"
 #define TCP_KEEPALIVE	1L

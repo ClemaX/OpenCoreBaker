@@ -16,7 +16,7 @@ int	config_write(char *filename, plist_t config_dict)
 {
 	char		*config_xml;
 	uint32_t	config_length;
-	FILE		*file = fopen(filename, "wb");
+	FILE		*file = fopen(filename, "w");
 	int			ret;
 
 	ret = 0;

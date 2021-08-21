@@ -2,19 +2,8 @@
 
 #include <sys/stat.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <libgen.h>
-
-#include <errno.h>
-#include <string.h>
-
-#include <plist/plist.h>
-
 #include <vitamin.h>
 #include <config.h>
-
-#include <url_queue.h>
 
 #define VIT_KEXT	VIT_DIRECTORY
 #define VIT_DRIVER	VIT_REGULAR

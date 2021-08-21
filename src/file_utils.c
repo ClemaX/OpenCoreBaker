@@ -19,8 +19,8 @@ int		fcopy(FILE *source, FILE *destination)
 
 int		copy(const char *src_path, const char *dest_path)
 {
-	FILE	*src_file = fopen(src_path, "rb");
-	FILE	*dest_file = fopen(dest_path, "wb");
+	FILE	*src_file = fopen(src_path, "r");
+	FILE	*dest_file = fopen(dest_path, "w");
 	int		ret = 0;
 
 	if (!src_file)

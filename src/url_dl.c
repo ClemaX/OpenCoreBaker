@@ -1,19 +1,28 @@
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
 #include <url_queue.h>
 
 #include <logger.h>
+#include <file_utils.h>
 
 static FILE	*url_fopen_dest(char* dest, char *url)
 {
-	const char		*filename = basename(url);
+	char			*filename = abasename(url);
 	char			*filepath = NULL;
 	FILE			*file = NULL;
 
-	asprintf(&filepath, "%s/%s", dest, filename);
-
-	if (filepath)
+	if (filename)
 	{
-		file = fopen(filepath, "w");
-		free(filepath);
+		asprintf(&filepath, "%s/%s", dest, filename);
+		free(filename);
+
+		if (filepath)
+		{
+			file = fopen(filepath, "w");
+			free(filepath);
+		}
 	}
 
 	if (!file)
@@ -34,7 +43,7 @@ t_url_dl	*url_dl_init(char* dest, char *url)
 	dl->url = url;
 	if (!(dl->file = url_fopen_dest(dest, url)))
 	{
-		error("%s: %s\n", basename(url), strerror(errno));
+		error("%s: %s\n", dest, strerror(errno));
 		goto failure_open_file;
 	}
 

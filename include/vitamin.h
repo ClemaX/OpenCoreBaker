@@ -34,7 +34,7 @@ char			**vitamins_urls(t_vitamin **vitamins, char **urls);
 int				vitamin_install(t_vitamin *vitamin,
 	const char *cache, const char *dest);
 int				vitamins_install(t_vitamin **vitamin,
-	const char *cache, const char *dest);
+	const char *cache, const char *dest, const char *sub_dir);
 
 int				vitamin_print(t_vitamin *vitamin);
 int				vitamins_print(t_vitamin **vitamins);

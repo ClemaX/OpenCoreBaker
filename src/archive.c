@@ -1,24 +1,13 @@
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
+#include <zip.h>
+
 #include <archive.h>
 
 #include <logger.h>
-
-int		is_folder(const char *url)
-{
-	const char *slash = strrchr(url, '/');
-	return ((url[0] == '.' && url[1] == '\0') || (slash && (slash[1] == '\0' || (slash[1] == '.' && slash[2] == '\0'))));
-}
-
-int		is_zip(const char *extension)
-{
-	return (!strcmp(extension, ".zip"));
-}
-
-int		is_archive(const char *url)
-{
-	const char	*extension = strrchr(url, '.');
-
-	return (extension && is_zip(extension));
-}
+#include <file_utils.h>
 
 int		copy_cb(zip_file_t *file, zip_stat_t *sb, const char *relative_path, const void *cb_data)
 {
@@ -51,7 +40,7 @@ int		copy_cb(zip_file_t *file, zip_stat_t *sb, const char *relative_path, const 
 		goto failure_open_dest;
 	}
 
-	if (!(dest_file = fopen(dest_path, "wb")))
+	if (!(dest_file = fopen(dest_path, "w")))
 	{
 		status = AR_FAIL_OPEN_DEST;
 		perror(dest_path);
@@ -188,7 +177,7 @@ int			archive_copy_file(zip_t *archive, const char *file_path,
 		status = AR_FAIL_OPEN_FILE;
 		goto failure_open_file;
 	}
-	if (!(dest = fopen(dest_path, "wb")))
+	if (!(dest = fopen(dest_path, "w")))
 	{
 		status = AR_FAIL_OPEN_DEST;
 		goto failure_open_dest;

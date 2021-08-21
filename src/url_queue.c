@@ -1,6 +1,11 @@
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
 #include <url_queue.h>
 
 #include <logger.h>
+#include <file_utils.h>
 
 // TODO: Fix meaningless return value
 int			url_queue_add(t_url_queue *queue, char *url)

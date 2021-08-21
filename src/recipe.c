@@ -1,13 +1,18 @@
+#include <stdlib.h>
+#include <errno.h>
+
 #include <recipe.h>
+#include <url_queue.h>
 
 #include <logger.h>
+#include <file_utils.h>
 
 static plist_t	plist_load(const char *filepath)
 {
 	FILE		*file;
 	struct stat	file_stat;
 
-	if ((file = fopen(filepath, "rb")))
+	if ((file = fopen(filepath, "r")))
 	{
 		size_t	file_size;
 		char	*plist_xml;
@@ -144,8 +149,8 @@ int				recipe_bake(t_recipe *recipe, const char *destination)
 		goto failure_fetch_queue;
 
 	debug("\nInstall: \n");
-	vitamins_install(recipe->kexts, queue->cache, destination);
-	vitamins_install(recipe->drivers, queue->cache, destination);
+	vitamins_install(recipe->kexts, queue->cache, destination, "Kexts");
+	vitamins_install(recipe->drivers, queue->cache, destination, "Drivers");
 
 	failure_fetch_queue:
 	url_queue_cleanup(queue);

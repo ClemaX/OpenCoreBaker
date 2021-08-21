@@ -20,10 +20,14 @@
 # define FILE_BUFFER_SIZE	8192
 #endif
 
-int	fcopy(FILE *source, FILE *destination);
-int	copy(const char *source_path, const char *destination_path);
+int		is_folder(const char *url);
+int		is_zip(const char *extension);
+int		is_archive(const char *url);
 
-int	zcopy(zip_file_t *source, FILE *destination);
+int		fcopy(FILE *source, FILE *destination);
+int		copy(const char *source_path, const char *destination_path);
+
+int		zcopy(zip_file_t *source, FILE *destination);
 
 char	*abasename(const char *str);
 char	*adirname(const char *str);

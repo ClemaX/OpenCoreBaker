@@ -38,6 +38,7 @@ SRCS = $(addprefix $(SRCDIR)/,\
 	url_dl.c\
 	archive.c\
 	file_utils.c\
+	file_types.c\
 	config.c\
 )
 

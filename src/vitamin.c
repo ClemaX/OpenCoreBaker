@@ -137,7 +137,7 @@ int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
 				if (mkdir_p(dest, AR_DEST_MODE))
 					status = AR_FAIL_OPEN_DEST;
 				else
-				status = copy(file_location, dest_path);
+					status = copy(file_location, dest_path);
 				free(dest_path);
 			}
 		}
@@ -147,14 +147,25 @@ int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
 	return (0);
 }
 
-int	vitamins_install(t_vitamin **vitamins, const char *cache, const char *dest)
+int	vitamins_install(t_vitamin **vitamins, const char *cache, const char *dest, const char *sub_dir)
 {
 	if (vitamins)
 	{
-		while (*vitamins)
+		if (sub_dir && *sub_dir && !(sub_dir[0] == '.' && sub_dir[1] == '\0'))
 		{
-			vitamin_install(*vitamins++, cache, dest);
+			char *dest_path;
+
+			if (asprintf(&dest_path, "%s/%s", dest, sub_dir) == -1)
+				return (0);
+
+			while (*vitamins)
+				vitamin_install(*vitamins++, cache, dest_path);
+
+			free(dest_path);
 		}
+
+		while (*vitamins)
+			vitamin_install(*vitamins++, cache, dest);
 	}
 	return (1);
 }

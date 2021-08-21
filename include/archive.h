@@ -1,13 +1,6 @@
 #pragma once
 
-#include <stdlib.h>
-#include <string.h>
-#include <libgen.h>
-#include <errno.h>
-
 #include <zip.h>
-
-#include <file_utils.h>
 
 #define ZIP_MODE		ZIP_RDONLY
 #define ZIP_ST_MODE	0
