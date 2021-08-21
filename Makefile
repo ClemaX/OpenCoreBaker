@@ -10,7 +10,7 @@ CC = clang
 LD = clang
 
 SRCDIR = srcs
-INCDIR = includes
+INCDIR = include
 
 OBJDIR = objs/$(DIST)
 BINDIR = bin/$(DIST)
