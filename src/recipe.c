@@ -51,11 +51,10 @@ t_recipe		*recipe_load(const char *filepath)
 			plist_t	config_node = RECIPE_GET(recipe_root, "Config");
 
 			plist_get_string_val(name_node, &recipe->name);
-			oc_load(&recipe->oc, oc_node);
+			oc_load(&recipe->oc, oc_node, config_node);
 			recipe->drivers = vitamins_load(drivers_node, VIT_DRIVER);
 			recipe->kexts = vitamins_load(kexts_node, VIT_KEXT);
 			recipe->ssdts = vitamins_load(ssdts_node, VIT_SSDT);
-			recipe->config = plist_copy(config_node);
 			recipe->urls = recipe_urls(recipe);
 		}
 		plist_free(recipe_root);
@@ -77,7 +76,6 @@ void			recipe_free(t_recipe **recipe)
 		vitamins_free(&content->kexts);
 		vitamins_free(&content->ssdts);
 		urls_free(&content->urls);
-		plist_free(content->config);
 	}
 }
 
@@ -187,8 +185,6 @@ int				recipe_print(t_recipe *recipe)
 		vitamins_print(recipe->kexts);
 		printf("\nSSDTs:\n");
 		vitamins_print(recipe->ssdts);
-		printf("\nConfig:\n");
-		config_print(recipe->config);
 		printf("\nDownloads:\n");
 		urls_print(recipe->urls);
 		return (0);

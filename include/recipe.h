@@ -22,7 +22,6 @@ typedef struct	s_recipe {
 	t_vitamin	**drivers;
 	t_vitamin	**kexts;
 	t_vitamin	**ssdts;
-	plist_t		config;
 	char		**urls;
 }				t_recipe;
 

@@ -144,7 +144,7 @@ int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
 		return (status);
 	}
 	error("Invalid cache: '%s'!\n", cache);
-	return (0);
+	return (AR_FAIL_OPEN_FILE);
 }
 
 int	vitamins_install(t_vitamin **vitamins, const char *cache, const char *dest, const char *sub_dir)
