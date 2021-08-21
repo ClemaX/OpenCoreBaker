@@ -25,8 +25,8 @@ LFLAGS = -lplist-2.0.3 -lcurl -lzip
 #endif
 
 ifeq ($(DIST), debug)
-	CFLAGS += -g3 -fsanitize=address -fsanitize=undefined# -fsanitize=leak
-	LFLAGS += -g3 -fsanitize=address -fsanitize=undefined# -fsanitize=leak
+	CFLAGS += -g3 -fsanitize=address -fsanitize=undefined -DDEBUG
+	LFLAGS += -g3 -fsanitize=address -fsanitize=undefined
 endif
 
 SRCS = $(addprefix $(SRCDIR)/,\
