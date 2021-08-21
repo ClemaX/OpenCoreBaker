@@ -32,6 +32,8 @@ typedef enum	e_ar_status
 
 typedef	uint8_t t_ar_opt;
 
+typedef int(*zip_ftw_cb)(zip_file_t *file, zip_stat_t *sb, const char *basename, const void *data);
+
 #define AR_RECURSIVE	1
 
 int		is_archive(const char *url);

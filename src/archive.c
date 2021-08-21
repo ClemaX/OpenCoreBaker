@@ -19,23 +19,44 @@ int		is_archive(const char *url)
 	return (extension && is_zip(extension));
 }
 
-int		copy_cb(zip_file_t *file, zip_stat_t *sb, const void *cb_data)
+int		copy_cb(zip_file_t *file, zip_stat_t *sb, const char *relative_path, const void *cb_data)
 {
 	t_ar_status	status = AR_SUCCESS;
 	char		*dest_path = NULL;
+	char		*dest_dir = NULL;
+	char		*basename = NULL;
 	FILE		*dest_file = NULL;
 
+	if (is_folder(sb->name))
+		goto done;
 
-	asprintf(&dest_path, "%s/%s", (const char *)cb_data, sb->name);
-	if (!dest_path)
+	if (!(basename = abasename(sb->name)))
 	{
 		status = AR_FAIL_ALLOC;
-		perror(sb->name);
+		goto failure_malloc_basename;
+	}
+
+	if (asprintf(&dest_path, "%s/%s/%s", (const char *)cb_data, relative_path, basename) == -1)
+	{
+		status = AR_FAIL_ALLOC;
+		perror("asprintf");
 		goto failure_malloc_dest_path;
 	}
 
-	if (is_folder(sb->name))
-		return (mkdir(dest_path, AR_DEST_MODE) ? AR_FAIL_OPEN_DEST : AR_SUCCESS);
+	if (!(dest_dir = adirname(dest_path)))
+	{
+		status = AR_FAIL_ALLOC;
+		perror("adirname");
+		goto failure_malloc_dest_dir;
+	}
+
+	debug("Creating directory at '%s'...\n", dest_dir);
+	if (mkdir_p(dest_dir, AR_DEST_MODE))
+	{
+		status = AR_FAIL_OPEN_DEST;
+		perror("mkdir");
+		goto failure_open_dest;
+	}
 
 	if (!(dest_file = fopen(dest_path, "wb")))
 	{
@@ -43,35 +64,44 @@ int		copy_cb(zip_file_t *file, zip_stat_t *sb, const void *cb_data)
 		perror(dest_path);
 		goto failure_open_dest;
 	}
+
+	debug("Copying '%s' to '%s'...\n", relative_path, dest_dir);
 	if (!zcopy(file, dest_file))
 	{
 		perror(dest_path);
 		status = AR_FAIL_WRITE_DEST;
 	}
-	
+
 	fclose(dest_file);
 
 	failure_open_dest:
-	free(dest_path);
-	
-	failure_malloc_dest_path:
+	free(dest_dir);
 
+	failure_malloc_dest_dir:
+	free(dest_path);
+
+	failure_malloc_dest_path:
+	free(basename);
+
+	failure_malloc_basename:
+	done:
 	return (status);
 }
 
-int		zip_ftw(zip_t *archive, const char *prefix,
-	int(*cb)(zip_file_t *, zip_stat_t *, const void *), const void *cb_data)
+int		zip_ftw(zip_t *archive, const char *prefix, zip_ftw_cb cb, const void *cb_data)
 {
 	size_t		prefix_length = strlen(prefix);
 	zip_int64_t	entries_count = zip_get_num_entries(archive, 0);
 	t_ar_status	status = AR_SUCCESS;
+	char		*dirname;
+	size_t		dirname_length;
 	zip_stat_t	sb;
 
 	for (zip_uint64_t i = 0; i < (zip_uint64_t)entries_count; i++)
 	{
 		zip_file_t	*file = NULL;
 		zip_stat_init(&sb);
-		
+
 		if (zip_stat_index(archive, i, ZIP_FL_MODE, &sb))
 		{
 			error("%s: %s!\n", prefix, zip_strerror(archive));
@@ -80,14 +110,23 @@ int		zip_ftw(zip_t *archive, const char *prefix,
 		}
 		if (!prefix || !strncmp(prefix, sb.name, prefix_length))
 		{
-			debug("'%s' matches '%s'!\n", sb.name, prefix);
 			if (!(file = zip_fopen_index(archive, i, ZIP_FL_MODE)))
 			{
 				error("%s: %s!\n", prefix, zip_strerror(archive));
 				status = AR_FAIL_OPEN_FILE;
 				goto done;
 			}
-			if ((status = cb(file, &sb, cb_data)))
+
+			if (!(dirname = adirname(prefix)))
+			{
+				status = AR_FAIL_ALLOC;
+				goto done;
+			}
+			dirname_length = strlen(dirname);
+			if (dirname_length == 1 && *dirname == '.')
+				dirname_length = 0;
+
+			if ((status = cb(file, &sb, sb.name + dirname_length, cb_data)))
 				goto done;
 			zip_fclose(file);
 		}
@@ -128,7 +167,7 @@ int		zip_load(const char **content,
 	free(content);
 
 	failure_malloc_content:
-	
+
 	failure_locate_file:
 	zip_close(archive);
 
@@ -160,10 +199,10 @@ int			archive_copy_file(zip_t *archive, const char *file_path,
 		status = AR_FAIL_OPEN_DEST;
 		goto failure_open_dest;
 	}
-	
+
 	if (!zcopy(file, dest))
 		status = AR_FAIL_WRITE_DEST;
-	
+
 	fclose(dest);
 
 	failure_open_dest:
@@ -181,7 +220,7 @@ int			archive_extract_zip(const char *archive_path, const char *file_path,
 	int		error = 0;
 	zip_t	*archive = zip_open(archive_path, ZIP_MODE, &error);
 
-	debug("Opening '%s/%s'...\n", archive_path, file_path);
+	debug("Extracting '%s/%s'...\n", archive_path, file_path);
 	if (!archive)
 	{
 		if (error == ZIP_ER_NOZIP)
