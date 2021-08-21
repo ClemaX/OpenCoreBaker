@@ -4,9 +4,11 @@
 
 #include <file_utils.h>
 
+#include <logger.h>
+
 static char	buffer[FILE_BUFFER_SIZE];
 
-int	fcopy(FILE *source, FILE *destination)
+int		fcopy(FILE *source, FILE *destination)
 {
 	size_t	bytes_read;
 
@@ -15,7 +17,26 @@ int	fcopy(FILE *source, FILE *destination)
 	return (bytes_read == 0);
 }
 
-int	zcopy(zip_file_t *source, FILE *destination)
+int		copy(const char *src_path, const char *dest_path)
+{
+	FILE	*src_file = fopen(src_path, "rb");
+	FILE	*dest_file = fopen(dest_path, "wb");
+	int		ret = 0;
+
+	if (!src_file)
+		error("%s: %s\n", src_path, strerror(errno));
+	else if (!dest_file)
+		error("%s: %s\n", dest_path, strerror(errno));
+	else
+		ret = fcopy(src_file, dest_file);
+
+	fclose(src_file);
+	fclose(dest_file);
+
+	return ret;
+}
+
+int		zcopy(zip_file_t *source, FILE *destination)
 {
 	size_t	bytes_read;
 
@@ -70,7 +91,7 @@ int			unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct F
 	int	ret = remove(fpath);
 
 	if (ret)
-		perror(fpath);
+		error("%s: %s\n", fpath, strerror(errno));
 
 	return (ret);
 }

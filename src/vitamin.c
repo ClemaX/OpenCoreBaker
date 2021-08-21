@@ -1,5 +1,6 @@
 #include <vitamin.h>
 
+#include <file_utils.h>
 #include <logger.h>
 
 t_vitamin		**vitamins_load(plist_t vitamins_array, t_vitamin_t type)
@@ -102,18 +103,18 @@ int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
 	if (cache)
 	{
 		char	*file_name = basename(vitamin->release_url);
+		char		*file_location = NULL;
 
+		if (asprintf(&file_location, "%s/%s", cache, file_name) == -1)
+		{
+			perror("Error");
+			goto failure_malloc_file_location;
+		}
 		if (is_archive(file_name))
 		{
 			t_ar_opt	options =
 				(vitamin->type & VIT_DIRECTORY) ? AR_RECURSIVE : 0;
-			char		*file_location = NULL;
 
-			if (asprintf(&file_location, "%s/%s", cache, file_name) == -1)
-			{
-				perror("Error");
-				goto failure_malloc_file_location;
-			}
 			if ((status = archive_extract(file_location, vitamin->path, dest,
 				options)))
 			{
@@ -129,7 +130,13 @@ int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
 		}
 		else
 		{
-			debug("TODO: Install local '%s' to '%s'...\n", vitamin->name, dest);
+			char	*dest_path;
+
+			if (asprintf(&dest_path, "%s/%s", dest, file_name) != -1)
+			{
+				status = copy(file_location, dest_path);
+				free(dest_path);
+			}
 		}
 		return (status);
 	}

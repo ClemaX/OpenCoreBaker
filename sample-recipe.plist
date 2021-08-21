@@ -67,14 +67,14 @@
 			<key>Path</key>
 			<string>Kexts/SMCSuperIO.kext/</string>
 		</dict>
-		<dict>
+		<!-- <dict>
 			<key>Name</key>
 			<string>USBPorts</string>
 			<key>ReleaseUrl</key>
 			<string>Kexts/</string>
 			<key>Path</key>
 			<string>USBPorts.kext/</string>
-		</dict>
+		</dict> -->
 		<dict>
 			<key>Name</key>
 			<string>WhateverGreen</string>

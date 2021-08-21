@@ -21,6 +21,8 @@
 #endif
 
 int	fcopy(FILE *source, FILE *destination);
+int	copy(const char *source_path, const char *destination_path);
+
 int	zcopy(zip_file_t *source, FILE *destination);
 
 char	*abasename(const char *str);

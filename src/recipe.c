@@ -145,6 +145,7 @@ int				recipe_bake(t_recipe *recipe, const char *destination)
 
 	debug("\nInstall: \n");
 	vitamins_install(recipe->kexts, queue->cache, destination);
+	vitamins_install(recipe->drivers, queue->cache, destination);
 
 	failure_fetch_queue:
 	url_queue_cleanup(queue);
