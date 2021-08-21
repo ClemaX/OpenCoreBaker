@@ -1,5 +1,7 @@
 #include <archive.h>
 
+#include <logger.h>
+
 int		is_folder(const char *url)
 {
 	return (strrchr(url, '/')[1] == '\0');
@@ -72,16 +74,16 @@ int		zip_ftw(zip_t *archive, const char *prefix,
 		
 		if (zip_stat_index(archive, i, ZIP_FL_MODE, &sb))
 		{
-			printf("%s: %s!\n", prefix, zip_strerror(archive));
+			error("%s: %s!\n", prefix, zip_strerror(archive));
 			status = AR_FAIL_LOCATE;
 			goto done;
 		}
-		if (!prefix || !strncmp(sb.name, prefix, prefix_length))
+		if (!prefix || !strncmp(prefix, sb.name, prefix_length))
 		{
-			printf("'%s' matches '%s'!\n", sb.name, prefix);
+			debug("'%s' matches '%s'!\n", sb.name, prefix);
 			if (!(file = zip_fopen_index(archive, i, ZIP_FL_MODE)))
 			{
-				printf("%s: %s!\n", prefix, zip_strerror(archive));
+				error("%s: %s!\n", prefix, zip_strerror(archive));
 				status = AR_FAIL_OPEN_FILE;
 				goto done;
 			}
@@ -142,7 +144,7 @@ int			archive_copy_file(zip_t *archive, const char *file_path,
 	zip_file_t	*file;
 	FILE		*dest;
 
-	fprintf(stderr, "Copying '%s' to '%s'!\n", file_path, dest_path);
+	debug("Copying '%s' to '%s'!\n", file_path, dest_path);
 	if ((index = zip_name_locate(archive, file_path, ZIP_ST_MODE)) == -1)
 	{
 		status = AR_FAIL_LOCATE;
@@ -179,13 +181,13 @@ int			archive_extract_zip(const char *archive_path, const char *file_path,
 	int		error = 0;
 	zip_t	*archive = zip_open(archive_path, ZIP_MODE, &error);
 
-	fprintf(stderr, "Opening '%s/%s'...\n", archive_path, file_path);
+	debug("Opening '%s/%s'...\n", archive_path, file_path);
 	if (!archive)
 	{
 		if (error == ZIP_ER_NOZIP)
-			fprintf(stderr, "Error: %s: Not a Zip file!\n", archive_path);
+			error("%s: Not a Zip file!\n", archive_path);
 		else
-			fprintf(stderr, "Error: %d\n", error);
+			error("%s: Unexpected libzip error %d!\n", archive_path, error);
 		return (AR_FAIL_OPEN);
 	}
 

@@ -1,5 +1,7 @@
 #include <recipe.h>
 
+#include <logger.h>
+
 static plist_t	plist_load(const char *filepath)
 {
 	FILE		*file;
@@ -16,7 +18,7 @@ static plist_t	plist_load(const char *filepath)
 
 		if ((plist_xml = malloc(sizeof(*plist_xml) * (file_size + 1))))
 		{
-			printf("Loading '%s' (%zu bytes)...\n", filepath, file_size);
+			debug("Loading '%s' (%zu bytes)...\n", filepath, file_size);
 			fread(plist_xml, sizeof(*plist_xml), file_size, file);
 			plist_from_xml(plist_xml, file_size, &plist_root);
 		}
@@ -137,13 +139,13 @@ int				recipe_bake(t_recipe *recipe, const char *destination)
 		goto failure_init_queue;
 	}
 
-	printf("Baking '%s' to '%s'...\n", recipe->name, destination);
+	info("Baking '%s' to '%s'...\n", recipe->name, destination);
 	if ((status = url_queue_fetch(queue)))
 		goto failure_fetch_queue;
 
-	printf("\nInstall: \n");
+	debug("\nInstall: \n");
 	vitamins_install(recipe->kexts, queue->cache, destination);
-	
+
 	failure_fetch_queue:
 	url_queue_cleanup(queue);
 

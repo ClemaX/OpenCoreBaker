@@ -1,5 +1,7 @@
 #include <baker.h>
 
+#include <logger.h>
+
 int main(int ac, char **av)
 {
 	if (ac == 3)
@@ -19,6 +21,6 @@ int main(int ac, char **av)
 		}
 		perror("Error during curl init");
 	}
-	printf("Usage:	%s <recipe-plist> <destination-dir>\n", av[0]);
+	error("Usage:	%s <recipe-plist> <destination-dir>\n", av[0]);
     return (1);
 }

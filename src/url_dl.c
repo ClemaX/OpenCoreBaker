@@ -1,5 +1,7 @@
 #include <url_queue.h>
 
+#include <logger.h>
+
 static FILE	*url_fopen_dest(char* dest, char *url)
 {
 	const char		*filename = basename(url);
@@ -15,7 +17,7 @@ static FILE	*url_fopen_dest(char* dest, char *url)
 	}
 
 	if (!file)
-		printf("Error: %s: %s\n", filepath, strerror(errno));	
+		error("%s: %s\n", filepath, strerror(errno));
 	return (file);
 }
 
@@ -32,7 +34,7 @@ t_url_dl	*url_dl_init(char* dest, char *url)
 	dl->url = url;
 	if (!(dl->file = url_fopen_dest(dest, url)))
 	{
-		printf("Error: %s: %s\n", basename(url), strerror(errno));
+		error("%s: %s\n", basename(url), strerror(errno));
 		goto failure_open_file;
 	}
 
@@ -48,7 +50,7 @@ t_url_dl	*url_dl_init(char* dest, char *url)
 	|| (code = curl_easy_setopt(dl->handle, CURLOPT_PRIVATE, dl))
 	|| (code = curl_easy_setopt(dl->handle, CURLOPT_FOLLOWLOCATION, 1)))
 	{
-		printf("Error settings handle options: %s\n", curl_easy_strerror(code));
+		error("Error setting curl handle options: %s\n", curl_easy_strerror(code));
 		goto failure_setopt_handle;
 	}
 	goto success;

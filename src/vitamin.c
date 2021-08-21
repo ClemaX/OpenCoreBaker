@@ -1,5 +1,7 @@
 #include <vitamin.h>
 
+#include <logger.h>
+
 t_vitamin		**vitamins_load(plist_t vitamins_array, t_vitamin_t type)
 {
 	const size_t	vitamins_length = plist_array_get_size(vitamins_array);
@@ -18,7 +20,7 @@ t_vitamin		**vitamins_load(plist_t vitamins_array, t_vitamin_t type)
 		free(iterator);
 		if ((size_t)(current - vitamins) != vitamins_length + 1)
 		{
-			printf("Error: Vitamin list loading failed!");
+			error("Error: Vitamin list loading failed!");
 			current = vitamins;
 			while ((*current))
 				free(*current++);
@@ -117,7 +119,7 @@ int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
 			if ((status = archive_extract(file_location, vitamin->path, dest,
 				options)))
 			{
-				printf("%s: %s!\n", file_location, archive_strerror(status));
+				error("%s: %s!\n", file_location, archive_strerror(status));
 				goto failure_extract_archive;
 			}
 
@@ -129,11 +131,11 @@ int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
 		}
 		else
 		{
-			
+			debug("TODO: Install local '%s' to '%s'...\n", vitamin->name, dest);
 		}
 		return (status);
 	}
-	printf("Invalid cache: '%s'!\n", cache);
+	error("Invalid cache: '%s'!\n", cache);
 	return (0);
 }
 

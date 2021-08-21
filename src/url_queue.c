@@ -1,16 +1,19 @@
 #include <url_queue.h>
 
+#include <logger.h>
+
+// TODO: Fix meaningless return value
 int			url_queue_add(t_url_queue *queue, char *url)
 {
 	int			status = 0;
 	CURLMcode	mcode = CURLM_OK;
 	t_url_dl	*dl = NULL;
-	
+
 	if (!(dl = url_dl_init(queue->cache, url)))
 		goto failure_dl_init;
 	if ((mcode = curl_multi_add_handle(queue->curl_multi, dl->handle)) != CURLM_OK)
 	{
-		printf("Error adding curl handle: %s\n", curl_multi_strerror(mcode));
+		error("Error adding curl handle: %s\n", curl_multi_strerror(mcode));
 		goto failure_add_handle;
 	}
 	goto success;
@@ -31,14 +34,14 @@ t_url_queue	*url_queue_init(char *cache_dest, char **urls)
 	if (cache_dest && (queue = malloc(sizeof(*queue))))
 	{
 		char *template = NULL;
-		
+
 		asprintf(&template, "%s/%s", cache_dest, CACHE_TEMPLATE);
 
 		if (template && (queue->cache = mkdtemp(template)))
 		{
 			if ((queue->curl_multi = curl_multi_init()))
 			{
-				printf("Caching files to '%s'!\n", queue->cache);
+				debug("Caching files to '%s'!\n", queue->cache);
 				curl_multi_setopt(queue->curl_multi, CURLMOPT_MAXCONNECTS, MAXCONNECTS);
 				queue->queue = urls;
 				queue->current = queue->queue;
@@ -51,7 +54,7 @@ t_url_queue	*url_queue_init(char *cache_dest, char **urls)
 			}
 			else
 			{
-				perror("Error initializing curl");
+				error("Error initializing curl: %s\n", strerror(errno));
 				free(queue);
 				queue = NULL;
 			}
@@ -71,15 +74,15 @@ static int	url_dl_handle_msg(CURLMsg *msg, char *url)
 	{
 		if (msg->data.result == CURLE_OK)
 		{
-			fprintf(stderr, "Downloaded '%s'!\n", file_name);
+			debug("Downloaded '%s'!\n", file_name);
 			goto done;
 		}
-		fprintf(stderr, "Error: '%s': %s!",
+		debug("Error: '%s': %s!",
 			file_name, curl_easy_strerror(msg->data.result));
 		status = 1;
 		goto done;
 	}
-	fprintf(stderr, "E: CURLMsg (%d)\n", msg->msg);
+	error("%s: CURLMsg (%d)\n", url, msg->msg);
 	status = 1;
 
 	done:
@@ -131,10 +134,10 @@ int			url_queue_fetch(t_url_queue *queue)
 void		url_queue_free(t_url_queue **queue, char del_cache)
 {
 	if (del_cache && rmrf((*queue)->cache) == -1)
-		printf("Error deleting cache '%s': %s\n", (*queue)->cache, strerror(errno));
+		error("Error deleting cache '%s': %s\n", (*queue)->cache, strerror(errno));
 	free((*queue)->cache);
 	free(*queue);
-	*queue = NULL;	
+	*queue = NULL;
 
 }
 
