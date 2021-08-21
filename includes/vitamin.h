@@ -1,18 +1,17 @@
-#ifndef VITAMIN_H
-# define VITAMIN_H
+#pragma once
 
-# include <stdlib.h>
-# include <stdio.h>
-# include <string.h>
-# include <libgen.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <libgen.h>
 
-# include <plist/plist.h>
+#include <plist/plist.h>
 
-# include <url.h>
-# include <archive.h>
+#include <url.h>
+#include <archive.h>
 
-# define VIT_REGULAR	1
-# define VIT_DIRECTORY	2
+#define VIT_REGULAR	1
+#define VIT_DIRECTORY	2
 
 typedef char	t_vitamin_t;
 
@@ -39,6 +38,3 @@ int				vitamins_install(t_vitamin **vitamin,
 
 int				vitamin_print(t_vitamin *vitamin);
 int				vitamins_print(t_vitamin **vitamins);
-
-
-#endif

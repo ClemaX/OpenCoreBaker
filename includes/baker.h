@@ -1,13 +1,9 @@
-#ifndef BAKER_H
-# define BAKER_H
+#pragma once
 
-# include <stdio.h>
-# include <string.h>
-# include <errno.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
-# include <curl/curl.h>
+#include <curl/curl.h>
 
-# include <recipe.h>
-
-
-#endif
+#include <recipe.h>

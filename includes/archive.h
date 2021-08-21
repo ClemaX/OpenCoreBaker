@@ -1,24 +1,23 @@
-#ifndef ARCHIVE_H
-# define ARCHIVE_H
+#pragma once
 
-# include <stdlib.h>
-# include <string.h>
-# include <libgen.h>
-# include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <libgen.h>
+#include <errno.h>
 
-# include <zip.h>
+#include <zip.h>
 
-# include <file_utils.h>
+#include <file_utils.h>
 
-# define ZIP_MODE		ZIP_RDONLY
-# define ZIP_ST_MODE	0
-# define ZIP_FL_MODE	0
+#define ZIP_MODE		ZIP_RDONLY
+#define ZIP_ST_MODE	0
+#define ZIP_FL_MODE	0
 
-# ifdef DEST_MODE
-#  define AR_DEST_MODE DEST_MODE
-# else
-#  define AR_DEST_MODE (S_IRWXU | S_IRGRP | S_IROTH)
-# endif
+#ifdef DEST_MODE
+# define AR_DEST_MODE DEST_MODE
+#else
+# define AR_DEST_MODE (S_IRWXU | S_IRGRP | S_IROTH)
+#endif
 
 typedef enum	e_ar_status
 {
@@ -33,12 +32,10 @@ typedef enum	e_ar_status
 
 typedef	uint8_t t_ar_opt;
 
-# define AR_RECURSIVE	1
+#define AR_RECURSIVE	1
 
 int		is_archive(const char *url);
 int		archive_extract(const char *archive_path, const char *file_path,
 	const char *dest_path, int options);
 
 const char	*archive_strerror(t_ar_status error);
-
-# endif
