@@ -37,7 +37,7 @@ t_url_dl	*url_dl_init(char* dest, char *url)
 
 	if (!(dl = malloc(sizeof(*dl))))
 	{
-		perror("Error");
+		perror("malloc");
 		goto failure_malloc_dl;
 	}
 	dl->url = url;

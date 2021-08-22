@@ -18,10 +18,12 @@ t_vitamin		**vitamins_load(plist_t vitamins_array, t_vitamin_t type)
 		do
 			plist_array_next_item(vitamins_array, iterator, &vitamin_entry);
 		while ((*current++ = vitamin_load(vitamin_entry, type)));
+
 		free(iterator);
+
 		if ((size_t)(current - vitamins) != vitamins_length + 1)
 		{
-			error("Error: Vitamin list loading failed!");
+			error("Error: Could not load vitamins!\n");
 			current = vitamins;
 			while ((*current))
 				free(*current++);
@@ -42,10 +44,15 @@ t_vitamin		*vitamin_load(plist_t vitamin_dict, t_vitamin_t type)
 		plist_t	path_node = plist_dict_get_item(vitamin_dict, "Path");
 		plist_t	release_url_node = plist_dict_get_item(vitamin_dict, "ReleaseUrl");
 
-		vitamin->type = type;
 		plist_get_string_val(name_node, &vitamin->name);
 		plist_get_string_val(path_node, &vitamin->path);
 		plist_get_string_val(release_url_node, &vitamin->release_url);
+
+		if (url_is_http(vitamin->release_url))
+			type |= VIT_HTTP;
+		else
+			type |= VIT_LOCAL;
+		vitamin->type = type;
 	}
 	return (vitamin);
 }
@@ -56,7 +63,7 @@ size_t		vitamins_size(t_vitamin **vitamins)
 
 	while (*vitamins)
 	{
-		if (url_is_http((*vitamins)->release_url))
+		if ((*vitamins)->type & VIT_HTTP)
 			size++;
 		vitamins++;
 	}
@@ -67,7 +74,7 @@ char		**vitamins_urls(t_vitamin **vitamins, char **urls)
 {
 	while (*vitamins)
 	{
-		if (url_is_http((*vitamins)->release_url))
+		if ((*vitamins)->type & VIT_HTTP)
 			urls_append(urls, (*vitamins)->release_url);
 		vitamins++;
 	}
@@ -96,21 +103,43 @@ void		vitamins_free(t_vitamin ***vitamins)
 	}
 }
 
-int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
+char	*vitamin_location(t_vitamin *vitamin, const char *work_dir, const char *cache)
+{
+	char	*file_name;
+	char	*location;
+
+	if (vitamin->type & VIT_HTTP)
+	{
+		file_name = abasename(vitamin->release_url);
+		if (file_name)
+		{
+			asprintf(&location, "%s/%s", cache, file_name);
+			free(file_name);
+		}
+		else
+			location = NULL;
+	}
+	else
+		asprintf(&location, "%s/%s/%s", work_dir, vitamin->release_url, vitamin->path);
+
+	return (location);
+}
+
+int	vitamin_install(t_vitamin *vitamin, const char *work_dir, const char *cache, const char *dest)
 {
 	t_ar_status status = AR_SUCCESS;
 
 	if (cache)
 	{
-		char	*file_name = basename(vitamin->release_url);
-		char		*file_location = NULL;
+		char	*file_location = NULL;
 
-		if (asprintf(&file_location, "%s/%s", cache, file_name) == -1)
+		if (!(file_location = vitamin_location(vitamin, work_dir, cache)))
 		{
-			perror("Error");
+			perror("malloc");
 			goto failure_malloc_file_location;
 		}
-		if (is_archive(file_name))
+
+		if (is_archive(vitamin->release_url))
 		{
 			t_ar_opt	options =
 				(vitamin->type & VIT_DIRECTORY) ? AR_RECURSIVE : 0;
@@ -132,7 +161,7 @@ int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
 		{
 			char	*dest_path;
 
-			if (asprintf(&dest_path, "%s/%s", dest, file_name) != -1)
+			if (asprintf(&dest_path, "%s/%s", dest, basename(file_location)) != -1)
 			{
 				if (mkdir_p(dest, AR_DEST_MODE))
 					status = AR_FAIL_OPEN_DEST;
@@ -147,7 +176,8 @@ int	vitamin_install(t_vitamin *vitamin, const char *cache, const char *dest)
 	return (AR_FAIL_OPEN_FILE);
 }
 
-int	vitamins_install(t_vitamin **vitamins, const char *cache, const char *dest, const char *sub_dir)
+int	vitamins_install(t_vitamin **vitamins, const char *work_dir, const char *cache,
+	const char *dest, const char *sub_dir)
 {
 	if (vitamins)
 	{
@@ -159,13 +189,13 @@ int	vitamins_install(t_vitamin **vitamins, const char *cache, const char *dest, 
 				return (0);
 
 			while (*vitamins)
-				vitamin_install(*vitamins++, cache, dest_path);
+				vitamin_install(*vitamins++, work_dir, cache, dest_path);
 
 			free(dest_path);
 		}
 
 		while (*vitamins)
-			vitamin_install(*vitamins++, cache, dest);
+			vitamin_install(*vitamins++, work_dir, cache, dest);
 	}
 	return (1);
 }

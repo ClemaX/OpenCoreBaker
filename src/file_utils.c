@@ -19,20 +19,23 @@ int		fcopy(FILE *source, FILE *destination)
 
 int		copy(const char *src_path, const char *dest_path)
 {
-	FILE	*src_file = fopen(src_path, "r");
-	FILE	*dest_file = fopen(dest_path, "w");
+	FILE	*src_file;
+	FILE	*dest_file;
 	int		ret = 0;
 
-	if (!src_file)
+	if (!(src_file = fopen(src_path, "r")))
 		error("%s: %s\n", src_path, strerror(errno));
-	else if (!dest_file)
+	else if (!(dest_file = fopen(dest_path, "w")))
+	{
 		error("%s: %s\n", dest_path, strerror(errno));
+		fclose(dest_file);
+	}
 	else
+	{
 		ret = fcopy(src_file, dest_file);
-
-	fclose(src_file);
-	fclose(dest_file);
-
+		fclose(src_file);
+		fclose(dest_file);
+	}
 	return ret;
 }
 

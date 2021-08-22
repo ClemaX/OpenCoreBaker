@@ -82,7 +82,7 @@ static int	url_dl_handle_msg(CURLMsg *msg, char *url)
 			debug("Downloaded '%s'!\n", file_name);
 			goto done;
 		}
-		debug("Error: '%s': %s!",
+		error("Error: '%s': %s!\n",
 			file_name, curl_easy_strerror(msg->data.result));
 		status = 1;
 		goto done;

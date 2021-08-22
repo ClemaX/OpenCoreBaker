@@ -18,7 +18,7 @@ void	oc_load(t_oc *oc, plist_t oc_dict, plist_t config_dict)
 	plist_get_string_val(architecture_node, &oc->architecture);
 
 	oc->vitamin.name = "OpenCore";
-	oc->vitamin.type = VIT_DIRECTORY;
+	oc->vitamin.type = VIT_DIRECTORY | VIT_HTTP;
 	oc_efi_path(&oc->vitamin.path, oc->architecture);
 	oc_url(&oc->vitamin.release_url, oc->version, oc->distribution);
 	// TODO: Validation
@@ -51,7 +51,7 @@ int		oc_install(t_oc *oc, const char *cache, const char *destination)
 		err = -1;
 	else
 	{
-		err = vitamin_install(&oc->vitamin, cache, destination);
+		err = vitamin_install(&oc->vitamin, NULL, cache, destination);
 
 		if (!err)
 			err = config_write(config_path, oc->config);

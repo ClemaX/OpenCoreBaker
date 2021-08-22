@@ -11,6 +11,7 @@
 #define OC_CONFIG_PATH			OC_PATH"/config.plist"
 #define OC_DRIVERS_PATH			OC_PATH"/Drivers"
 #define OC_KEXTS_PATH			OC_PATH"/Kexts"
+#define OC_SSDTS_PATH			OC_PATH"/SSDTS"
 
 /// version, distribution
 #define OC_FILENAME_TEMPLATE	"OpenCore-%s-%s.zip"

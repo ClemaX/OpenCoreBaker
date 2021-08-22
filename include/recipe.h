@@ -17,6 +17,7 @@
 
 
 typedef struct	s_recipe {
+	const char	*work_dir;
 	char		*name;
 	t_oc		oc;
 	t_vitamin	**drivers;
@@ -25,7 +26,7 @@ typedef struct	s_recipe {
 	char		**urls;
 }				t_recipe;
 
-t_recipe	*recipe_load(const char *filepath);
+t_recipe	*recipe_load(const char *work_dir, const char *filepath);
 void		recipe_free(t_recipe **recipe);
 
 char		**recipe_urls(t_recipe *recipe);

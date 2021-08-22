@@ -19,7 +19,7 @@ int	config_write(char *filename, plist_t config_dict)
 	FILE		*file = fopen(filename, "w");
 	int			ret;
 
-	ret = 0;
+	ret = 1;
 	if (file)
 	{
 		plist_to_xml(config_dict, &config_xml, &config_length);
@@ -27,12 +27,13 @@ int	config_write(char *filename, plist_t config_dict)
 		{
 			if (fwrite(config_xml, sizeof(*config_xml), config_length, file) == config_length)
 			{
-				info("Config written to '%s'\n", filename);
-				ret = 1;
+				info("Config written to '%s'!\n", filename);
+				ret = 0;
 			}
 			free(config_xml);
 		}
-		error("Could not export config!\n");
+		else
+			error("Could not export config!\n");
 		fclose(file);
 	}
 	return (ret);

@@ -30,16 +30,17 @@ static plist_t	plist_load(const char *filepath)
 		fclose(file);
 		return (plist_root);
     }
-	perror("Error");
+	perror(filepath);
 	return (NULL);
 }
 
-t_recipe		*recipe_load(const char *filepath)
+t_recipe		*recipe_load(const char *work_dir, const char *filename)
 {
 	plist_t		recipe_root;
 	t_recipe	*recipe = NULL;
+	char		*filepath;
 
-	if ((recipe_root = plist_load(filepath)))
+	if (asprintf(&filepath, "%s/%s", work_dir, filename) != -1 && (recipe_root = plist_load(filepath)))
 	{
 		if ((recipe = malloc(sizeof(*recipe))))
 		{
@@ -50,6 +51,7 @@ t_recipe		*recipe_load(const char *filepath)
 			plist_t	ssdts_node = RECIPE_GET(recipe_root, "SSDT");
 			plist_t	config_node = RECIPE_GET(recipe_root, "Config");
 
+			recipe->work_dir = work_dir;
 			plist_get_string_val(name_node, &recipe->name);
 			oc_load(&recipe->oc, oc_node, config_node);
 			recipe->drivers = vitamins_load(drivers_node, VIT_DRIVER);
@@ -120,7 +122,7 @@ int				recipe_bake(t_recipe *recipe, const char *destination)
 
 	if (!enclosing_dir)
 	{
-		perror("Error");
+		perror("adirname");
 		status = 1;
 		goto failure_malloc_dirname;
 	}
@@ -152,8 +154,9 @@ int				recipe_bake(t_recipe *recipe, const char *destination)
 
 	debug("\nInstall: \n");
 	oc_install(&recipe->oc, queue->cache, destination);
-	vitamins_install(recipe->kexts, queue->cache, destination, OC_KEXTS_PATH);
-	vitamins_install(recipe->drivers, queue->cache, destination, OC_DRIVERS_PATH);
+	vitamins_install(recipe->kexts, recipe->work_dir, queue->cache, destination, OC_KEXTS_PATH);
+	vitamins_install(recipe->drivers, recipe->work_dir, queue->cache, destination, OC_DRIVERS_PATH);
+	vitamins_install(recipe->ssdts, recipe->work_dir, queue->cache, destination, OC_SSDTS_PATH);
 
 	failure_fetch_queue:
 	url_queue_cleanup(queue);
